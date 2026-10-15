@@ -1,0 +1,8 @@
+ultralytics
+runpod
+pillow
+fastapi
+uvicorn
+python-multipart
+pydantic
+pydantic-settings
