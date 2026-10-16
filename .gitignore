@@ -1,0 +1,4 @@
+.gradio
+__pycache__
+data
+*.pt

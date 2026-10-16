@@ -1,0 +1,29 @@
+name: Build and Push to Docker Hub
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+    
+      - name: Download YOLOv8 weights
+        run: |
+            mkdir -p models
+            wget -q https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt -O models/yolov8s.pt
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest
