@@ -11,7 +11,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-    
+
+      - name: Run unit tests
+        run: |
+          pip install -r requirements.txt
+          pytest tests/ -v
+
       - name: Download YOLOv8 weights
         run: |
             mkdir -p models
@@ -23,7 +28,16 @@ jobs:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest .
+
+      - name: Integration test against container
+        run: |
+          docker run -d -p 8000:8000 --name yolov8-api ...
+          # wait loop here
+          BASE_URL=http://localhost:8000 pytest tests/integration/ -v
+
+      - name: Push Docker image
+        run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest
