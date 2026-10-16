@@ -15,7 +15,7 @@ jobs:
       - name: Run unit tests
         run: |
           pip install -r requirements.txt
-          pytest tests/units -v
+          pytest tests/unit/ -v
 
       - name: Download YOLOv8 weights
         run: |
