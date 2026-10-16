@@ -4,16 +4,17 @@ from ultralytics import YOLO
 
 from app.schemas import BBox, Detection, DetectionResponse
 
+
 class YOLOInferenceService:
     def __init__(self, yolo_model_path):
         self.model = YOLO(yolo_model_path)
         if torch.cuda.is_available():
-            device = "cuda"
+            self.device = "cuda"
         elif torch.backends.mps.is_available():
-            device = "mps"
+            self.device = "mps"
         else:
-            device = "cpu"
-        self.model.to(device)
+            self.device = "cpu"
+        self.model.to(self.device)
 
     def predict(self, image: Image.Image) -> DetectionResponse:
         """
