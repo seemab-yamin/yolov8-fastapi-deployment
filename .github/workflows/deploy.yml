@@ -40,7 +40,7 @@ jobs:
           docker ps -a --filter name=yolov8-api
           docker logs yolov8-api
           # Wait for the API to be ready (up to 120 seconds)
-          timeout 120 bash -c 'until curl -sf http://localhost:8000/ > /dev/null; do echo "Waiting for API..."; sleep 3; done
+          timeout 120 bash -c 'until curl -sf http://localhost:8000/ > /dev/null; do echo "Waiting for API..."; sleep 3; done'
           BASE_URL=http://localhost:8000 pytest tests/integration/ -v
 
       - name: Push Docker image
