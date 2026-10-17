@@ -12,6 +12,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
       - name: Run unit tests
         run: |
           pip install -r requirements.txt
@@ -19,28 +25,24 @@ jobs:
 
       - name: Download YOLOv8 weights
         run: |
-            mkdir -p models
-            wget -q https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt -O models/yolov8s.pt
+          mkdir -p models
+          wget -q https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt -O models/yolov8s.pt
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
         run: |
           IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api
           SHA=${{ github.sha }}
-          
           docker build -t $IMAGE:$SHA -t $IMAGE:latest .
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest .
 
       - name: Integration test against container
         run: |
           docker run -d -p 8000:8000 --name yolov8-api ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest
-          # wait loop here
-          sleep 2
           docker ps -a --filter name=yolov8-api
           docker logs yolov8-api
           # Wait for the API to be ready (up to 120 seconds)
@@ -49,5 +51,11 @@ jobs:
 
       - name: Push Docker image
         run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api
+          SHA=${{ github.sha }}
           docker push $IMAGE:$SHA
           docker push $IMAGE:latest
+
+      - name: Cleanup
+        if: always()
+        run: docker stop yolov8-api && docker rm yolov8-api
