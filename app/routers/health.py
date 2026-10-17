@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 router = APIRouter(tags=["Health"])
 
 
-@router.get("/")
+@router.get("/ping")
 def health_check(request: Request):
     """
     Health check endpoint to confirm the API is running.
