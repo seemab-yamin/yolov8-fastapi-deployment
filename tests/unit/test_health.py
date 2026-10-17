@@ -13,12 +13,12 @@ def client():
 
 
 def test_health_returns_200(client):
-    response = client.get("/")
+    response = client.get("/ping")
     assert response.status_code == 200
 
 
 def test_health_payload(client):
-    response = client.get("/")
+    response = client.get("/ping")
     data = response.json()
     assert "status" in data
     assert data["status"] == "running"
