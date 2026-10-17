@@ -9,8 +9,11 @@ from app.services import YOLOInferenceService
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.ready = False
     app.state.inference_service = YOLOInferenceService(settings.model_path)
+    app.state.ready = True
     yield
+    app.state.ready = False
     app.state.inference_service = None
 
 
