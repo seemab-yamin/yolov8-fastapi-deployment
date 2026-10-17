@@ -30,6 +30,10 @@ jobs:
 
       - name: Build Docker image
         run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api
+          SHA=${{ github.sha }}
+          
+          docker build -t $IMAGE:$SHA -t $IMAGE:latest .
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest .
 
       - name: Integration test against container
@@ -45,4 +49,5 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/yolov8-api:latest
+          docker push $IMAGE:$SHA
+          docker push $IMAGE:latest
