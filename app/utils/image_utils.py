@@ -1,7 +1,10 @@
 import io
+from pathlib import Path
 
 from fastapi import HTTPException, UploadFile
 from PIL import Image, UnidentifiedImageError
+
+from app.schemas import DetectionResponse
 
 # Allowed image formats for the detection endpoint
 ALLOWED_CONTENT_TYPES = {
@@ -87,4 +90,40 @@ def validate_image_dimensions(
         raise HTTPException(
             status_code=400,
             detail=f"Image too large ({width}x{height}). Max side: {max_side}px.",
+        )
+
+
+def annotate_image(image, detections: DetectionResponse):
+    """
+    Annotate the image with bounding boxes and class names based on detections.
+    """
+    from PIL import ImageDraw, ImageFont
+
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+
+    for det in detections.detections:
+        bbox = det.bbox
+        # Draw rectangle
+        draw.rectangle(
+            [bbox.x1, bbox.y1, bbox.x2, bbox.y2],
+            outline="red",
+            width=2,
+        )
+        # Draw label
+        label = f"{det.class_name} ({det.confidence:.2f})"
+        draw.text((bbox.x1, bbox.y1 - 10), label, fill="red", font=font)
+
+    return image
+
+
+def save_image(image: Image.Image, dir_path: Path, file_name: str):
+    try:
+        image_path = dir_path / file_name
+        image.save(image_path)
+        return image_path
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to save image: {str(e)}",
         )
