@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from app.config import settings
-from app.routers import health, predict
+from app.routers import annotate, download, health, predict
 from app.services import YOLOInferenceService
 
 
@@ -20,3 +21,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Object Detection API", lifespan=lifespan)
 app.include_router(health.router)
 app.include_router(predict.router)
+app.include_router(annotate.router)
+app.include_router(download.router)
+
+
+@app.get("/")
+def root():
+    return RedirectResponse(url="/docs")

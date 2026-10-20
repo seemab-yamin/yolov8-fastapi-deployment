@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +13,10 @@ class Settings(BaseSettings):
     model_path: str = "models/yolov8s.pt"
     device: str = "cuda"
     confidence_threshold: float = 0.25
+
+    # directory for saving annotated images
+    SAVE_DIR: Path = Path("static/saved_dir")
+    os.makedirs(SAVE_DIR, exist_ok=True)
 
 
 settings = Settings()
